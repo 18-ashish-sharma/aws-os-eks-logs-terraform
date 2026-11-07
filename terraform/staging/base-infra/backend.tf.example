@@ -1,0 +1,24 @@
+# Copy to backend.tf and fill in the names printed by the remote-state stack:
+#   cp backend.tf.example backend.tf && terraform init
+#
+# Or keep this file as is and pass values at init time (partial configuration):
+#   terraform init -backend-config="bucket=..." -backend-config="dynamodb_table=..."
+#
+# With workspaces, state for workspace "x" is stored at env:/x/<key>.
+
+terraform {
+  backend "s3" {
+    bucket  = "terraform-eks-logs-staging-state"
+    key     = "base-infra/terraform.tfstate"
+    region  = "ap-south-1"
+    encrypt = true
+
+    # Classic locking with a DynamoDB table (created by the remote-state stack).
+    dynamodb_table = "terraform-eks-logs-staging-lock"
+
+    # Terraform >= 1.10 can lock with S3 alone (a .tflock object next to the
+    # state). To switch, set use_lockfile = true and, once every pipeline uses
+    # >= 1.10, remove dynamodb_table.
+    # use_lockfile = true
+  }
+}
